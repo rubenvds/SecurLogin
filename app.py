@@ -29,7 +29,7 @@ def login():
         if length > 1:
             msg = Message("danger", "error: multiple users with this name")
         elif length == 0: 
-            msg = MEssage("danger", "no user with this username")
+            msg = Message("danger", "no user with this username")
         elif length == 1:
             for result in array:
                 databasePassword = result[4]
@@ -54,13 +54,15 @@ def login():
 
 @app.route('/user')
 def userdashboard():
-    return render_template('user.html', title='Logged in' )
+    msg = None
+    return render_template('user.html', title='Logged in', msg=msg )
 
 @app.route('/admin')
 def admindashboard():
+    msg = None
     role = session['LoggedIn']
     if(role == 2):
-        return render_template('admin.html', title='Admin Dashboard')
+        return render_template('admin.html', title='Admin Dashboard', msg=msg)
     elif(role == 1):
         return redirect('user')
     else:
@@ -75,13 +77,14 @@ def logout():
 
 @app.route('/users')
 def users():
+    msg = None
     role = session['LoggedIn']
     if(role == 2):
         conn = sqlite3.connect('test.db')
         cursor = conn.execute('''SELECT * FROM `users`''')
         allusers = cursor.fetchall()
         print(allusers)
-        return render_template('users.html', title='user Dashboard', users=allusers)
+        return render_template('users.html', title='user Dashboard', users=allusers, msg=msg)
     elif(role == 1):
         return redirect('user')
     else:
