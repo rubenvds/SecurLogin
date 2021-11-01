@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-
+{% if msg != None %}
+    <div class="alert alert-{{msg.type}}">
+        {{ msg.text }}
+    </div>
+{% endif %}
 User
 
 {% endblock content %}
