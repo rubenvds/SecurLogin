@@ -17,7 +17,7 @@ def login():
     msg = None
     if request.method == "POST":
         # CHECK WITH DATABASE
-        rfid = 3930
+        rfid = int(input())
         username = request.form.get('username')
         password = request.form.get('password')
 
