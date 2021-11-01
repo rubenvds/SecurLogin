@@ -21,6 +21,9 @@ conn.execute('''CREATE TABLE 'users' (
 conn.execute('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
 	VALUES ('2','rubenvds', 'somesalt','mypassword',003930, 0, 0)''')
 
+conn.execute('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
+  VALUES ('1','richard', 'somesalt','mypassword',003931, 0, 0)''')
+
 cursor = conn.execute("SELECT * from `users`")
 for row in cursor:
    print(row)
