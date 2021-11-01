@@ -15,6 +15,7 @@ def Read_Card():
     ser.close()
     x = x.decode()
     print(x)
+    return x
 
 
 def Read_It():
