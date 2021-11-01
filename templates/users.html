@@ -1,0 +1,21 @@
+<table>
+  <tr>
+    <th>username</th>
+    <th>role</th>
+    <th>rfid</th>
+    <th>login attempts</th>
+    <th>locked</th>
+    <th>edit</th>
+  </tr>
+{% for row in users %}
+    <tr>
+      <td>{{ row[2] }}</td>
+      <td>{{ row[1]}}</td>
+      <td>{{ row[5]}}</td>
+      <td>{{ row[6]}}</td>
+      <td>{{ row[7]}}</td>
+      <td><button>Edit</button onclick="edit({{ row[0]}})"></td>
+    </tr>
+{% endfor %}
+</table>
+<button>Adding users</button>

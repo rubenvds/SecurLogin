@@ -118,9 +118,9 @@ def userlist():
 	#get userlist
 	print("userlist")
 	cursor = conn.execute("SELECT * from `users`")
-	for row in cursor:
-	   print(row)
+	array = cursor.fetchall()
 
+	
 if __name__ == "__main__":
 	main()
 
