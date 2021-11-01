@@ -15,6 +15,12 @@ class Message():
 @app.route("/", methods=['GET', 'POST'])
 def login():
     msg = None
+    role = session['LoggedIn']
+    if(role == 2):
+        return redirect('admin')
+    elif(role == 1):
+        return redirect('user')
+
     if request.method == "POST":
         # CHECK WITH DATABASE
         rfid = int(input())
@@ -55,7 +61,7 @@ def login():
 @app.route('/user')
 def userdashboard():
     msg = None
-    return render_template('user.html', title='Logged in', msg=msg )
+    return render_template('user.html', title='Logged in', msg=msg)
 
 @app.route('/admin')
 def admindashboard():
@@ -97,7 +103,8 @@ def user_edit(id):
         conn = sqlite3.connect('test.db')
         cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
         user = cursor.fetchone()
-        return render_template('user_edit.html', title='user edit Dashboard', user = user)
+        msg = None
+        return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
     elif(role == 1):
         return redirect('user')
     else:
