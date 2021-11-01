@@ -15,6 +15,12 @@ class Message():
 @app.route("/", methods=['GET', 'POST'])
 def login():
     msg = None
+    role = session['LoggedIn']
+    if(role == 2):
+        return redirect('admin')
+    elif(role == 1):
+        return redirect('user')
+
     if request.method == "POST":
         # CHECK WITH DATABASE
         rfid = 3930
