@@ -2,7 +2,9 @@
 MOD1 Project @ TCS University of Twente
 
 Needed Libraries:
-- SQLite
+- SQLite (Integrated in python3)
+- Flask
+- Flask-session
 
 Setup instructions:
 
