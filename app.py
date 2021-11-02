@@ -15,7 +15,7 @@ class Message():
 @app.route("/", methods=['GET', 'POST'])
 def login():
     msg = None
-    role = session['LoggedIn']
+    role = session.get('LoggedIn',0)
     if(role == 2):
         return redirect('admin')
     elif(role == 1):
@@ -47,7 +47,6 @@ def login():
                     msg = Message("Danger", "This account is locked, please ask a system administration")
                 else:
                     if databasePassword == password and rfid == databaserfid:
-                        session['LoggedIn'] = 1
                         if role == '1':
                             session['LoggedIn'] = 1
                             return redirect('user')
@@ -66,7 +65,7 @@ def userdashboard():
 @app.route('/admin')
 def admindashboard():
     msg = None
-    role = session['LoggedIn']
+    role = session.get('LoggedIn',0)
     msg = None
     if(role == 2):
         return render_template('admin.html', title='Admin Dashboard', msg=msg)
@@ -85,7 +84,7 @@ def logout():
 @app.route('/users')
 def users():
     msg = None
-    role = session['LoggedIn']
+    role = session.get('LoggedIn',0)
     if(role == 2):
         conn = sqlite3.connect('test.db')
         cursor = conn.execute('''SELECT * FROM `users`''')
@@ -98,7 +97,7 @@ def users():
 
 @app.route('/user_edit/<id>')
 def user_edit(id):
-    role = session['LoggedIn']
+    role = session.get('LoggedIn',0)
     if(role == 2):
         conn = sqlite3.connect('test.db')
         cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
