@@ -123,6 +123,9 @@ def user_edit(id):
     role = session.get('LoggedIn',0)
     if(role == 2):
         conn = sqlite3.connect('test.db')
+        conn = sqlite3.connect('test.db')
+        cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
+        user = cursor.fetchone()
         if request.method == "POST":
             username = request.form.get('username')
             password = request.form.get('password')
@@ -133,10 +136,8 @@ def user_edit(id):
             else:
                 cursor = conn.execute('''UPDATE `users` SET role = '%s',user_name='%s',password='%s', RFID='%s' WHERE user_id = '%s' ''' % (role, username, password, rfid, id))
             conn.commit()
-            return "updated"
-        conn = sqlite3.connect('test.db')
-        cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
-        user = cursor.fetchone()
+            msg = Message("Success", "updated the user profile")
+            return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
         msg = None
         return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
     elif(role == 1):
@@ -151,7 +152,9 @@ def unlock(id):
         conn = sqlite3.connect('test.db')
         conn.execute(''' UPDATE `users` SET locked=0, Failed_Login_Attempts=0 WHERE user_id='%s';''' % id)
         conn.commit()
-        return "unlocked user %s" % id
+        msg = Message("Success", "unlocked the user")
+        return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
+
     elif(role == 1):
         return redirect('user')
     else:
