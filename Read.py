@@ -5,7 +5,7 @@ import time
 
 def Read_Card():
     print("Wait for the card ")
-    ser = serial.Serial("COM5", 9600)
+    ser = serial.Serial("COM3", 9600)
     k = 0;  # check which port was really used
     while k == 0:
         x = ser.readline()
@@ -13,11 +13,11 @@ def Read_Card():
         if str.find("UID") != -1:
             k = 1
     ser.close()
-    x = x.decode()
-    print(x)
-    return x
+    print(str[10:])
+    return str
 
 
+Read_Card()
 def Read_It():
     if __name__ == '__main__':
         p = multiprocessing.Process(target=Read_Card, name="Read_card", args=())
@@ -31,5 +31,3 @@ def Read_It():
 
         # Cleanup
         p.join()
-
-Read_It()

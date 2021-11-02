@@ -13,15 +13,17 @@ conn.execute('''CREATE TABLE 'users' (
   'user_name' VARCHAR(50) NULL,
   'salt' VARCHAR(255) NULL,
   'password' VARCHAR(255) NULL,
-  'RFID' INT NULL,
+  'RFID' VARCHAR(15) NULL,
   'Failed_Login_Attempts' INT NULL,
   'locked' BOOL NULL
   )''')
 
 conn.execute('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
-	VALUES ('2','rubenvds', 'somesalt','mypassword',003930, 0, 0),
-  VALUES ('1','richard', 'somesalt','mypassword',003931, 0, 0),
-  VALUES ('1','robertp19', 'somesalt','mypassword',003932, 0, 0)''')
+	VALUES ('2','ruben', 'somesalt','mypassword','CA 88 F6 80', 0, 0)''')
+conn.execute('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
+  VALUES ('1','richard', 'somesalt','mypassword','CA 18 EC 75', 0, 0)''')
+conn.execute('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
+  VALUES ('1','daniel', 'somesalt','mypassword','CA 88 F6 80', 0, 0)''')
 
 
 

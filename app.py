@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, session, redirect
 from flask_session import Session
 import threading
 import sqlite3
+import serial
+
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
@@ -10,6 +12,20 @@ class Message():
     def __init__(self, msgtype='', text=''):
         self.type = msgtype
         self.text = text
+
+
+def Read_Card():
+    print("Wait for the card ")
+    ser = serial.Serial("COM3", 9600)
+    k = 0;  # check which port was really used
+    while k == 0:
+        x = ser.readline()
+        str = x.decode()
+        if str.find("UID") != -1:
+            k = 1 
+    ser.close()
+    return str[10:]
+
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -23,9 +39,10 @@ def login():
 
     if request.method == "POST":
         # CHECK WITH DATABASE
-        rfid = int(input())
         username = request.form.get('username')
         password = request.form.get('password')
+        rfid = Read_Card()
+        print(rfid)
 
         conn = sqlite3.connect('test.db')
 
@@ -46,7 +63,10 @@ def login():
                 if locked == 1:
                     msg = Message("Danger", "This account is locked, please ask a system administration")
                 else:
-                    if databasePassword == password and rfid == databaserfid:
+                    print(databaserfid.strip())
+                    print(rfid.strip())
+                    print(rfid.strip() == databaserfid.strip())
+                    if databasePassword == password and rfid.strip() == databaserfid.strip():
                         if role == '1':
                             session['LoggedIn'] = 1
                             return redirect('user')
@@ -54,7 +74,8 @@ def login():
                             session['LoggedIn'] = 2
                             return redirect('admin')
                     else:
-                        msg = Message("Danger","invalid credentials")          
+                        msg = Message("Danger","invalid credentials")   
+    #rfid = Read_Card().apply_async();       
     return render_template('login.html', title='Login', msg=msg)
 
 @app.route('/user')
@@ -112,3 +133,6 @@ def user_edit(id):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
