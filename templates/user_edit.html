@@ -1,11 +1,36 @@
 {% extends 'adminbase.html' %}
 {% block content %}
-<p>Hello world!</p>{{ user[2] }}
-<p>Username: {{ user[2] }}</p>
-<p>password: hidden</p>
-<p>role: {{ user[1] }}</p>
-<p>rfid: {{ user[5] }}</p>
-<p>failed attemps: {{ user[6] }}</p>
-<p>locked: {{ user[7] }}</p>
+<form action="/{{ 'user_edit/' + user[0]|string }}" method="post">
+	
+
+	<p>Hello world!</p>{{ user[2] }}<br><br>
+	<label>Username: </label><br>
+	<input type="text" name="username" value="{{ user[2] }}"><br><br>
+
+	<label>password:</label><br>
+	<input type="password" name="password"><br><br>
+
+	<label>role: </label><br>
+	<input type="text" name="role" value="{{ user[1] }}"><br><br>
+
+
+	<label>rfid:</label><br>
+	<input type="text" name="rfid" value="{{ user[5] }}"><br><br>
+
+	<label>Failed login attempts:</label><br>
+	<p>{{ user[6] }}</p><br>
+
+	<label>locked</label><br>
+	<p>{{ user[7] }}</p>
+	{% if user[7] > 0 %}
+	<button type="button" onclick="window.location.href = '/unlock/{{ user[0] }}'">Unlock</button><br>
+	{% endif %}
+
+	<br>
+
+	<button type="submit">Save</button>
+
+	
+</form>
 
 {% endblock content %}

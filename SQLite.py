@@ -21,10 +21,9 @@ conn.execute('''CREATE TABLE 'users' (
 conn.execute('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
 	VALUES ('2','ruben', 'somesalt','mypassword','CA 88 F6 80', 0, 0)''')
 conn.execute('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
-  VALUES ('1','richard', 'somesalt','mypassword','CA 18 EC 75', 0, 0)''')
+  VALUES ('1','richard', 'somesalt','mypassword','CA 18 EC 75', 3, 1)''')
 conn.execute('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
   VALUES ('1','daniel', 'somesalt','mypassword','CA 88 F6 80', 0, 0)''')
-
 
 
 

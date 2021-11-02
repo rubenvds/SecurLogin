@@ -24,6 +24,7 @@ def Read_Card():
         if str.find("UID") != -1:
             k = 1 
     ser.close()
+
     return str[10:]
 
 
@@ -41,7 +42,8 @@ def login():
         # CHECK WITH DATABASE
         username = request.form.get('username')
         password = request.form.get('password')
-        rfid = Read_Card()
+        #rfid = Read_Card()
+        rfid = "CA 88 F6 80"
         print(rfid)
 
         conn = sqlite3.connect('test.db')
@@ -116,10 +118,22 @@ def users():
     else:
         return redirect('/')
 
-@app.route('/user_edit/<id>')
+@app.route('/user_edit/<id>', methods=['GET', 'POST'])
 def user_edit(id):
     role = session.get('LoggedIn',0)
     if(role == 2):
+        conn = sqlite3.connect('test.db')
+        if request.method == "POST":
+            username = request.form.get('username')
+            password = request.form.get('password')
+            role = request.form.get('role')
+            rfid = request.form.get('rfid')
+            if password == '':
+                cursor = conn.execute('''UPDATE `users` SET role = '%s',user_name='%s', RFID='%s' WHERE user_id = '%s' ''' % (role, username, rfid, id))
+            else:
+                cursor = conn.execute('''UPDATE `users` SET role = '%s',user_name='%s',password='%s', RFID='%s' WHERE user_id = '%s' ''' % (role, username, password, rfid, id))
+            conn.commit()
+            return "updated"
         conn = sqlite3.connect('test.db')
         cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
         user = cursor.fetchone()
@@ -130,6 +144,18 @@ def user_edit(id):
     else:
         return redirect('/')
 
+@app.route('/unlock/<id>')
+def unlock(id):
+    role = session.get('LoggedIn',0)
+    if(role == 2):
+        conn = sqlite3.connect('test.db')
+        conn.execute(''' UPDATE `users` SET locked=0, Failed_Login_Attempts=0 WHERE user_id='%s';''' % id)
+        conn.commit()
+        return "unlocked user %s" % id
+    elif(role == 1):
+        return redirect('user')
+    else:
+        return redirect('/')
 
 if __name__ == "__main__":
     app.run(debug=True)
