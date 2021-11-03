@@ -18,7 +18,8 @@
 
 
 	<label>rfid:</label><br>
-	<input type="text" name="rfid" value="{{ user[5] }}"><br><br>
+	<p>{{ user[5] }}</p>
+	<button type="button" onclick="window.location.href = '/connect/{{ user[0] }}'">Connect RFID Card</button><br><br>
 
 	<label>Failed login attempts:</label><br>
 	<p>{{ user[6] }}</p><br>

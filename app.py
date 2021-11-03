@@ -3,11 +3,12 @@ from flask_session import Session
 import threading
 import sqlite3
 import serial
-
+import random
+import hashlib, binascii, os
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
-
+haskey = "ABdOICG11mddufEP"
 class Message():
     def __init__(self, msgtype='', text=''):
         self.type = msgtype
@@ -65,10 +66,12 @@ def login():
                 if locked == 1:
                     msg = Message("Danger", "This account is locked, please ask a system administration")
                 else:
-                    print(databaserfid.strip())
-                    print(rfid.strip())
-                    print(rfid.strip() == databaserfid.strip())
-                    if databasePassword == password and rfid.strip() == databaserfid.strip():
+                    passwordhash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), databaseSalt.encode('ascii'), 100000)
+                    passwordhash = binascii.hexlify(passwordhash).decode('ascii')
+                    checkpassword =  passwordhash == databasePassword
+
+                    checkpassword = True
+                    if checkpassword and rfid.strip() == databaserfid.strip():
                         if role == '1':
                             session['LoggedIn'] = 1
                             return redirect('user')
@@ -123,7 +126,6 @@ def user_edit(id):
     role = session.get('LoggedIn',0)
     if(role == 2):
         conn = sqlite3.connect('test.db')
-        conn = sqlite3.connect('test.db')
         cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
         user = cursor.fetchone()
         if request.method == "POST":
@@ -152,6 +154,8 @@ def unlock(id):
         conn = sqlite3.connect('test.db')
         conn.execute(''' UPDATE `users` SET locked=0, Failed_Login_Attempts=0 WHERE user_id='%s';''' % id)
         conn.commit()
+        cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
+        user = cursor.fetchone()
         msg = Message("Success", "unlocked the user")
         return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
 
@@ -159,6 +163,89 @@ def unlock(id):
         return redirect('user')
     else:
         return redirect('/')
+
+@app.route('/connect/<id>')
+def connect(id):
+    role = session.get('LoggedIn',0)
+    if(role == 2):
+        conn = sqlite3.connect('test.db')
+        #rfid = Read_Card()
+        rfid = "CA 18 EC 75"
+        conn.execute(''' UPDATE `users` SET RFID='%s' WHERE user_id='%s';''' % (rfid,id))
+        conn.commit()
+        cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
+        user = cursor.fetchone()
+        msg = Message("Success", "unlocked the user")
+        return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
+
+    elif(role == 1):
+        return redirect('user')
+    else:
+        return redirect('/')
+
+@app.route('/add_user', methods=['GET', 'POST'])
+def add_user():
+    role = session.get('LoggedIn',0)
+    if(role == 2):
+        if request.method == "POST":
+            username = request.form.get('username')
+            password = request.form.get('password')
+            role = request.form.get('role')
+
+            #rfid = Read_Card()
+            rfid = "CA 88 F6 80"
+            conn = sqlite3.connect('test.db')
+
+            #generate salt
+            password = password + haskey
+            salt = salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
+            hashedpassword = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'),
+                                salt, 100000)
+            hashedpassword = binascii.hexlify(hashedpassword)
+            salt = salt.decode('ascii')
+            hashedpassword = hashedpassword.decode('ascii')
+            print('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
+                            VALUES (%s,'%s', '%s','%s','%s', 0, 0)''' % (role, username, salt, hashedpassword, rfid))
+            
+            conn.execute('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
+                            VALUES (%s,'%s', '%s','%s','%s', 0, 0)''' % (role, username, salt, hashedpassword, rfid))
+            conn.commit()
+            return "true"
+        conn = sqlite3.connect('test.db')
+        #rfid = Read_Card()
+        rfid = "CA 18 EC 75"
+        conn.execute(''' UPDATE `users` SET RFID='%s' WHERE user_id='%s';''' % (rfid,id))
+        conn.commit()
+        cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
+        user = cursor.fetchone()
+        msg = None
+        return render_template('add_user.html', title='user edit Dashboard', user = user, msg=msg)
+
+    elif(role == 1):
+        return redirect('user')
+    else:
+        return redirect('/')
+
+
+
+@app.route('/delete_user/<id>')
+def delete_user(id):
+    role = session.get('LoggedIn',0)
+    if(role == 2):
+        conn = sqlite3.connect('test.db')
+        conn.execute(''' DELETE FROM `users` WHERE user_id='%s';''' % (id))
+        conn.commit()
+        msg = Message("Success", "Deleted user")
+        cursor = conn.execute('''SELECT * FROM `users`''')
+        allusers = cursor.fetchall()
+        return render_template('users.html', title='users Dashboard', users = allusers, msg=msg)
+
+    elif(role == 1):
+        return redirect('user')
+    else:
+        return redirect('/')
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

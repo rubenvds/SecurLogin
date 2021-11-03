@@ -1,0 +1,16 @@
+{% extends 'adminbase.html' %}
+{% block content %}
+<form action="/add_user" method="post">
+	<label>Username: </label><br>
+	<input type="text" name="username" value="{{ user[2] }}"><br><br>
+
+	<label>password:</label><br>
+	<input type="password" name="password"><br><br>
+
+	<label>role: </label><br>
+	<input type="text" name="role" value="{{ user[1] }}"><br><br>
+	<button type="submit">Add user</button>
+</form>
+
+
+{% endblock content %}
