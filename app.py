@@ -16,17 +16,28 @@ class Message():
 
 
 def Read_Card():
+    key=170
+    cyphertext = []
+    bin =[]
+    plain_bin=[]
+    UID= ""
     print("Wait for the card ")
     ser = serial.Serial("COM3", 9600)
-    k = 0;  # check which port was really used
-    while k == 0:
+    k = 0  # check which port was really used
+    while k < 8:
         x = ser.readline()
-        str = x.decode()
-        if str.find("UID") != -1:
-            k = 1 
+        string_ = x.decode()
+        if string_[0].isdigit()==True:
+            cyphertext.append(string_.split("\r\n")[0])
+            k = k + 1
     ser.close()
-
-    return str[10:]
+    print(cyphertext)
+    for i in cyphertext :
+        x = int (i) #the incripted cyphertext
+        y=x^key
+        UID=UID+chr(y)
+    print(UID)
+    return UID
 
 
 
@@ -43,8 +54,8 @@ def login():
         # CHECK WITH DATABASE
         username = request.form.get('username')
         password = request.form.get('password')
-        #rfid = Read_Card()
-        rfid = "CA 88 F6 80"
+        rfid = Read_Card()
+        #rfid = "CA 88 F6 80"
         print(rfid)
 
         conn = sqlite3.connect('test.db')
@@ -67,11 +78,13 @@ def login():
                 if locked == 1:
                     msg = Message("danger", "This account is locked, please ask a system administration")
                 else:
+                    password = password + haskey
                     passwordhash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), databaseSalt.encode('ascii'), 100000)
                     passwordhash = binascii.hexlify(passwordhash).decode('ascii')
                     checkpassword =  passwordhash == databasePassword
-
                     if checkpassword and rfid.strip() == databaserfid.strip():
+                        conn.execute(''' UPDATE `users` SET Failed_Login_Attempts = 0 WHERE user_name = '%s'  ''' % username)
+                        conn.commit()
                         if role == '1':
                             session['LoggedIn'] = 1
                             return redirect('user')
@@ -177,13 +190,13 @@ def connect(id):
     role = session.get('LoggedIn',0)
     if(role == 2):
         conn = sqlite3.connect('test.db')
-        #rfid = Read_Card()
-        rfid = "CA 18 EC 75"
+        rfid = Read_Card()
+        #rfid = "CA 18 EC 75"
         conn.execute(''' UPDATE `users` SET RFID='%s' WHERE user_id='%s';''' % (rfid,id))
         conn.commit()
         cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
         user = cursor.fetchone()
-        msg = Message("success", "unlocked the user")
+        msg = Message("success", "connected the card to the user")
         return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
 
     elif(role == 1):
@@ -197,11 +210,21 @@ def add_user():
     if(role == 2):
         if request.method == "POST":
             username = request.form.get('username')
+            conn = sqlite3.connect('test.db')
+            cursor = conn.execute('''SELECT user_name FROM `users` WHERE user_name = '%s' ''' % username)
+            conn.commit()
+            array = cursor.fetchall()
+            length = len(array)
+            if length > 0:
+                msg = Message("danger","This username already exist")
+                return render_template('add_user.html', title='user edit Dashboard', msg=msg)
+
+
             password = request.form.get('password')
             role = request.form.get('role')
 
-            #rfid = Read_Card()
-            rfid = "CA 88 F6 80"
+            rfid = Read_Card()
+            #rfid = "CA 88 F6 80"
             conn = sqlite3.connect('test.db')
 
             #generate salt
@@ -218,7 +241,9 @@ def add_user():
             conn.execute('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
                             VALUES (%s,'%s', '%s','%s','%s', 0, 0)''' % (role, username, salt, hashedpassword, rfid))
             conn.commit()
-            return "true"
+            msg = Message("success", "Sucessfully added user with username %s" % username)
+            return render_template('add_user.html', title='user edit Dashboard', msg=msg)
+
         conn = sqlite3.connect('test.db')
         #rfid = Read_Card()
         rfid = "CA 18 EC 75"

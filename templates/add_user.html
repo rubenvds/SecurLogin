@@ -1,16 +1,35 @@
 {% extends 'adminbase.html' %}
 {% block content %}
-<form action="/add_user" method="post">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<form id="add_user_form" action="/add_user" method="post">
 	<label>Username: </label><br>
-	<input type="text" name="username" value="{{ user[2] }}"><br><br>
+	<input type="text" name="username"><br><br>
 
 	<label>password:</label><br>
 	<input type="password" name="password"><br><br>
 
 	<label>role: </label><br>
-	<input type="text" name="role" value="{{ user[1] }}"><br><br>
-	<button type="submit">Add user</button>
+	<select name="role">
+	    <option value="1">User</option>
+	    <option value="2">Admin</option>
+	  </select><br><br>
+	<button id="submit" type="submit">Add user</button>
 </form>
 
-
+<div style="position:absolute; top:0; left:0; width: 100vw; height: 100vh; background-color: white; display: none; opacity: 0.8;" id="overlay"></div>
+<div style="position:absolute; top:0; left:0; width: 100vw; height: 100vh; display: none;" id="overlay2">
+    <div class="ocrloader">
+        <p>Scanning RFID</p>
+        <em></em>
+        <span></span>
+    </div>  
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+$('#add_user_form').submit(function() {
+    document.getElementById('overlay').style.display = 'block'
+    document.getElementById('overlay2').style.display = 'block'
+    return true; // return false to cancel form action
+});
+</script>
 {% endblock content %}
