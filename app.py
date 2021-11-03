@@ -88,8 +88,7 @@ def login():
                                 print("increment")
                                 conn.execute(''' UPDATE `users` SET Failed_Login_Attempts = Failed_Login_Attempts + 1 WHERE user_name = '%s'  ''' % username)
                                 conn.commit()
-                        msg = Message("danger","invalid credentials")   
-    #rfid = Read_Card().apply_async();       
+                        msg = Message("danger","invalid credentials")         
     return render_template('login.html', title='Login', msg=msg)
 
 @app.route('/user')
