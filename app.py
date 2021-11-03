@@ -61,16 +61,16 @@ def login():
                 databasePassword = result[4]
                 databaseSalt = result[3]
                 databaserfid = result[5]
+                databaseLoginAttempts = result[6]
                 role = result[1]
                 locked = result[7]
                 if locked == 1:
-                    msg = Message("Danger", "This account is locked, please ask a system administration")
+                    msg = Message("danger", "This account is locked, please ask a system administration")
                 else:
                     passwordhash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), databaseSalt.encode('ascii'), 100000)
                     passwordhash = binascii.hexlify(passwordhash).decode('ascii')
                     checkpassword =  passwordhash == databasePassword
 
-                    checkpassword = True
                     if checkpassword and rfid.strip() == databaserfid.strip():
                         if role == '1':
                             session['LoggedIn'] = 1
@@ -79,7 +79,16 @@ def login():
                             session['LoggedIn'] = 2
                             return redirect('admin')
                     else:
-                        msg = Message("Danger","invalid credentials")   
+                        if checkpassword == False:
+                            if databaseLoginAttempts >= 2:
+                                conn.execute(''' UPDATE `users` SET Failed_Login_Attempts = Failed_Login_Attempts + 1, locked = 1 WHERE user_name = '%s'  ''' % username)
+                                conn.commit()
+                                print("blocked account")
+                            else:
+                                print("increment")
+                                conn.execute(''' UPDATE `users` SET Failed_Login_Attempts = Failed_Login_Attempts + 1 WHERE user_name = '%s'  ''' % username)
+                                conn.commit()
+                        msg = Message("danger","invalid credentials")   
     #rfid = Read_Card().apply_async();       
     return render_template('login.html', title='Login', msg=msg)
 
@@ -138,7 +147,7 @@ def user_edit(id):
             else:
                 cursor = conn.execute('''UPDATE `users` SET role = '%s',user_name='%s',password='%s', RFID='%s' WHERE user_id = '%s' ''' % (role, username, password, rfid, id))
             conn.commit()
-            msg = Message("Success", "updated the user profile")
+            msg = Message("success", "updated the user profile")
             return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
         msg = None
         return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
@@ -156,7 +165,7 @@ def unlock(id):
         conn.commit()
         cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
         user = cursor.fetchone()
-        msg = Message("Success", "unlocked the user")
+        msg = Message("success", "unlocked the user")
         return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
 
     elif(role == 1):
@@ -175,7 +184,7 @@ def connect(id):
         conn.commit()
         cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
         user = cursor.fetchone()
-        msg = Message("Success", "unlocked the user")
+        msg = Message("success", "unlocked the user")
         return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
 
     elif(role == 1):
@@ -235,7 +244,7 @@ def delete_user(id):
         conn = sqlite3.connect('test.db')
         conn.execute(''' DELETE FROM `users` WHERE user_id='%s';''' % (id))
         conn.commit()
-        msg = Message("Success", "Deleted user")
+        msg = Message("success", "Deleted user")
         cursor = conn.execute('''SELECT * FROM `users`''')
         allusers = cursor.fetchall()
         return render_template('users.html', title='users Dashboard', users = allusers, msg=msg)
