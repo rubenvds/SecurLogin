@@ -1,5 +1,27 @@
 {% extends 'adminbase.html' %}
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+function link_rfid(){
+	console.log("start")
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('overlay2').style.display = 'block';
+    document.getElementById('link_rfid').disabled = true;
+    window.location.href = '/connect/{{ user[0] }}'
+}
+
+$(document).ready(function() {
+    $("#link_rfid").click(function(){
+	console.log("start")
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('overlay2').style.display = 'block';
+    document.getElementById('link_rfid').disabled = true;
+    window.location.href = '/connect/{{ user[0] }}'
+}); 
+});
+</script>
+
 <form action="/{{ 'user_edit/' + user[0]|string }}" method="post">
 	
 
@@ -11,11 +33,25 @@
 	<input type="password" name="password"><br><br>
 
 	<label>role: </label><br>
-	<input type="text" name="role" value="{{ user[1] }}"><br><br>
+	{% if user[1] == 1 %}
+	<select name="role">
+	    <option value="1" selected="selected">User</option>
+	    <option value="2">Admin</option>
+	</select>
+
+	{% else %}
+	<select name="role">
+	    <option value="1">User</option>
+	    <option value="2" selected="selected">Admin</option>
+	</select>
+	{% endif %}
+	<br><br>
+
 
 
 	<label>rfid:</label><br>
-	<input type="text" name="rfid" value="{{ user[5] }}"><br><br>
+	<p>{{ user[5] }}</p>
+	<button type="button" id="link_rfid">Connect RFID Card</button><br><br>
 
 	<label>Failed login attempts:</label><br>
 	<p>{{ user[6] }}</p><br>
@@ -23,7 +59,7 @@
 	<label>locked</label><br>
 	<p>{{ user[7] }}</p>
 	{% if user[7] > 0 %}
-	<button type="button" onclick="window.location.href = '/unlock/{{ user[0] }}'">Unlock</button><br>
+	<button type="button" id="link_rfid" onclick="window.location.href = '/unlock/{{ user[0] }}'">Unlock</button><br>
 	{% endif %}
 
 	<br>
@@ -32,5 +68,18 @@
 
 	
 </form>
+
+
+
+<div style="position:absolute; top:0; left:0; width: 100vw; height: 100vh; background-color: white; display: none; opacity: 0.8;" id="overlay"></div>
+<div style="position:absolute; top:0; left:0; width: 100vw; height: 100vh; display: none;" id="overlay2">
+    <div class="ocrloader">
+        <p>Scanning RFID</p>
+        <em></em>
+        <span></span>
+    </div>  
+</div>
+
+
 
 {% endblock content %}
