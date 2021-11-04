@@ -54,9 +54,8 @@ def login():
         # CHECK WITH DATABASE
         username = request.form.get('username')
         password = request.form.get('password')
-        rfid = Read_Card()
-        #rfid = "CA 88 F6 80"
-        print(rfid)
+        # rfid = Read_Card()
+        rfid = "ca88f680"
 
         conn = sqlite3.connect('test.db')
 

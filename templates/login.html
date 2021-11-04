@@ -4,9 +4,7 @@
     <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
         <div class="card border-0 shadow rounded-3 my-5">
             <div class="card-body p-4 p-sm-5" id='card'>
-                    <div> 
-                        <h1>Login</h1>
-                    <div>
+                    <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Logo" class="logo_login">
                 {% if msg != None %}
                     <div class="alert alert-{{msg.type}}">
                         {{ msg.text }}

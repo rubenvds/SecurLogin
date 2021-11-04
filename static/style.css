@@ -133,4 +133,11 @@
      }
     
   }
-  
+
+.logo_login{
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  margin-bottom: 30px;
+}
