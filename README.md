@@ -17,3 +17,7 @@ Setup instructions:
 
 3. Run flask app  
 `python app.py`  
+
+
+Message types (classes):
+https://getbootstrap.com/docs/5.1/components/alerts/#examples
