@@ -22,7 +22,7 @@ def Read_Card():
     plain_bin=[]
     UID= ""
     print("Wait for the card ")
-    ser = serial.Serial("COM5", 9600)
+    ser = serial.Serial("COM3", 9600)
     k = 0  # check which port was really used
     while k < 8:
         x = ser.readline()
@@ -159,16 +159,11 @@ def user_edit(id):
             password = request.form.get('password')
             role = request.form.get('role')
 
-
-            
-
-
             if password == '':
                 cursor = conn.execute('''UPDATE `users` SET role = '%s',user_name='%s' WHERE user_id = '%s' ''' % (role, username, id))
             else:
-                array = cursor.fetchall()
-                for result in array:
-                    salt = result[3]
+
+                salt = user[3]
 
                 password = password + haskey
                 passwordhash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), salt.encode('ascii'), 100000)
@@ -178,6 +173,7 @@ def user_edit(id):
             msg = Message("success", "updated the user profile")
             return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
         msg = None
+        print(user[1])
         return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
     elif(role == 1):
         return redirect('user')
