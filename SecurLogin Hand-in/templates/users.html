@@ -1,0 +1,24 @@
+{% extends 'adminbase.html' %}
+{% block content %}
+<table>
+  <tr>
+    <th>username</th>
+    <th>role</th>
+    <th>rfid</th>
+    <th>login attempts</th>
+    <th>locked</th>
+    <th>edit</th>
+  </tr>
+{% for row in users %}
+    <tr>
+      <td>{{ row[2] }}</td>
+      <td>{{ row[1]}}</td>
+      <td>{{ row[5]}}</td>
+      <td>{{ row[6]}}</td>
+      <td>{{ row[7]}}</td>
+      <td><button onclick="window.location.href='/user_edit/{{ row[0]}}'">Edit</button></td>
+    </tr>
+{% endfor %}
+</table>
+<button onclick="window.location.href='/add_user'">Add user</button>
+{% endblock content %}

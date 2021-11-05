@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+        <div class="card border-0 shadow rounded-3 my-5">
+            <div class="card-body p-4 p-sm-5" id='card'>
+                    <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Logo" class="logo_login">
+                {% if msg != None %}
+                    <div class="alert alert-{{msg.type}}">
+                        {{ msg.text }}
+                    </div>
+                {% endif %}
+                <form action="{{ url_for('login') }}" method="post" id='login_form'>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="floatingInput" placeholder="Username" name="username" required>
+                        <label for="floatingInput">Username</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" required>
+                        <label for="floatingPassword">Password</label>
+                    </div>
+                    <div class="d-grid">
+                        <button class="btn btn-primary" type="submit">Scan RFID</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="position:absolute; top:0; left:0; width: 100vw; height: 100vh; background-color: white; display: none; opacity: 0.8;" id="overlay"></div>
+<div style="position:absolute; top:0; left:0; width: 100vw; height: 100vh; display: none;" id="overlay2">
+    <div class="ocrloader">
+        <p>Scanning RFID</p>
+        <em></em>
+        <span></span>
+    </div>  
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+$('#login_form').submit(function() {
+    document.getElementById('overlay').style.display = 'block'
+    document.getElementById('overlay2').style.display = 'block'
+    return true; // return false to cancel form action
+});
+</script>
+
+{% endblock content %}
