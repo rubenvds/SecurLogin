@@ -22,7 +22,7 @@ def Read_Card():
     plain_bin=[]
     UID= ""
     print("Wait for the card ")
-    ser = serial.Serial("COM3", 9600)
+    ser = serial.Serial("COM5", 9600)
     k = 0  # check which port was really used
     while k < 8:
         x = ser.readline()
@@ -158,11 +158,22 @@ def user_edit(id):
             username = request.form.get('username')
             password = request.form.get('password')
             role = request.form.get('role')
-            rfid = request.form.get('rfid')
+
+
+            
+
+
             if password == '':
-                cursor = conn.execute('''UPDATE `users` SET role = '%s',user_name='%s', RFID='%s' WHERE user_id = '%s' ''' % (role, username, rfid, id))
+                cursor = conn.execute('''UPDATE `users` SET role = '%s',user_name='%s' WHERE user_id = '%s' ''' % (role, username, id))
             else:
-                cursor = conn.execute('''UPDATE `users` SET role = '%s',user_name='%s',password='%s', RFID='%s' WHERE user_id = '%s' ''' % (role, username, password, rfid, id))
+                array = cursor.fetchall()
+                for result in array:
+                    salt = result[3]
+
+                password = password + haskey
+                passwordhash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), salt.encode('ascii'), 100000)
+                passwordhash = binascii.hexlify(passwordhash).decode('ascii')
+                cursor = conn.execute('''UPDATE `users` SET role = '%s',user_name='%s',password='%s' WHERE user_id = '%s' ''' % (role, username, passwordhash, id))
             conn.commit()
             msg = Message("success", "updated the user profile")
             return render_template('user_edit.html', title='user edit Dashboard', user = user, msg=msg)
@@ -198,8 +209,16 @@ def connect(id):
         rfid = Read_Card()
         #rfid = "CA 18 EC 75"
         
+
+        getSQLData = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
+        array = getSQLData.fetchall()
+        for result in array:
+            salt = result[3]
+
+
+
         rfid = rfid + haskey
-        rfidhash = hashlib.pbkdf2_hmac('sha512', rfid.encode('utf-8'), databaseSalt.encode('ascii'), 100000)
+        rfidhash = hashlib.pbkdf2_hmac('sha512', rfid.encode('utf-8'), salt.encode('ascii'), 100000)
         rfidhash = binascii.hexlify(rfidhash).decode('ascii')
 
         
@@ -237,9 +256,7 @@ def add_user():
             rfid = Read_Card()
             #rfid = "CA 88 F6 80"
             
-            rfid = rfid + haskey
-            rfidhash = hashlib.pbkdf2_hmac('sha512', rfid.encode('utf-8'), databaseSalt.encode('ascii'), 100000)
-            rfidhash = binascii.hexlify(rfidhash).decode('ascii')
+            
                     
                     
             conn = sqlite3.connect('test.db')
@@ -250,8 +267,12 @@ def add_user():
             hashedpassword = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'),
                                 salt, 100000)
             hashedpassword = binascii.hexlify(hashedpassword)
+            rfid = rfid + haskey
+            rfidhash = hashlib.pbkdf2_hmac('sha512', rfid.encode('utf-8'), salt, 100000)
+            rfidhash = binascii.hexlify(rfidhash).decode('ascii')
             salt = salt.decode('ascii')
             hashedpassword = hashedpassword.decode('ascii')
+            
             print('''INSERT INTO 'users' ('role', 'user_name', 'salt', 'password', 'rfid', 'Failed_Login_Attempts', 'locked' )
                             VALUES (%s,'%s', '%s','%s','%s', 0, 0)''' % (role, username, salt, hashedpassword, rfidhash))
             
@@ -262,15 +283,15 @@ def add_user():
             return render_template('add_user.html', title='user edit Dashboard', msg=msg)
 
         conn = sqlite3.connect('test.db')
-        rfid = Read_Card()
+        # rfid = Read_Card()
         
-        rfid = rfid + haskey
-        rfidhash = hashlib.pbkdf2_hmac('sha512', rfid.encode('utf-8'), databaseSalt.encode('ascii'), 100000)
-        rfidhash = binascii.hexlify(rfidhash).decode('ascii')
+        # rfid = rfid + haskey
+        # rfidhash = hashlib.pbkdf2_hmac('sha512', rfid.encode('utf-8'), databaseSalt.encode('ascii'), 100000)
+        # rfidhash = binascii.hexlify(rfidhash).decode('ascii')
                 
                 
-        conn.execute(''' UPDATE `users` SET RFID='%s' WHERE user_id='%s';''' % (rfidhash,id))
-        conn.commit()
+        # conn.execute(''' UPDATE `users` SET RFID='%s' WHERE user_id='%s';''' % (rfidhash,id))
+        # conn.commit()
         cursor = conn.execute('''SELECT * FROM `users` WHERE user_id = '%s' ''' % id)
         user = cursor.fetchone()
         msg = None
